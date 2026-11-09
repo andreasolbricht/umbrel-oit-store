@@ -1,0 +1,27 @@
+#!/bin/sh
+set -eu
+
+if [ -z "${UMBREL_ROOT:-}" ]; then
+  echo "UMBREL_ROOT is not set" >&2
+  exit 1
+fi
+
+app_dir="${UMBREL_ROOT}/app-data/oit-threadfin"
+data="${app_dir}/data"
+
+if [ -L "${app_dir}" ] || [ -L "${data}" ]; then
+  echo "oit-threadfin data path must not be a symlink" >&2
+  exit 1
+fi
+
+mkdir -p "${data}"
+
+if [ -L "${data}/conf" ] || [ -L "${data}/cache" ]; then
+  echo "oit-threadfin conf or cache must not be a symlink" >&2
+  exit 1
+fi
+
+mkdir -p "${data}/conf" "${data}/cache"
+
+chown -R 31337:31337 "${data}"
+chmod 750 "${data}" "${data}/conf" "${data}/cache"

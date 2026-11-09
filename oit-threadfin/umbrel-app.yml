@@ -1,0 +1,33 @@
+manifestVersion: 1
+id: oit-threadfin
+category: media
+name: Threadfin
+version: "0.1.0"
+tagline: IPTV-Proxy für Plex Live-TV
+description: >-
+  Threadfin führt M3U-Sender und XMLTV-Programmführer zusammen und stellt sie
+  Plex als HDHomeRun-Tuner bereit. Playlist- und EPG-Adressen werden nur in
+  der Threadfin-Oberfläche eingetragen, nicht in diesem Store.
+
+  Nach dem Start den Tuner in Plex manuell auf http://127.0.0.1:34400 setzen
+  und als EPG http://127.0.0.1:34400/xmltv/threadfin.xml verwenden. Dafür muss
+  der Plex-Container im Host-Netz laufen, so wie die offizielle Umbrel-App.
+developer: Threadfin
+website: https://github.com/Threadfin/Threadfin
+dependencies: []
+repo: https://github.com/Threadfin/Threadfin
+support: https://github.com/Threadfin/Threadfin/issues
+port: 34400
+gallery: []
+path: /web
+defaultUsername: ""
+defaultPassword: ""
+icon: https://raw.githubusercontent.com/andreasolbricht/umbrel-oit-store/main/oit-threadfin/icon.svg
+submitter: OIT
+releaseNotes: >-
+  Erstes Umbrel-Paket. Threadfin 1.2.37, Image
+  fyb3roptik/threadfin:1.2.37@sha256:96122ab220e14b881cbd40d7f8c7b022e1f9c6ecfe05aca2ab801e0321dc0d61.
+  Die Oberfläche bleibt hinter der Umbrel-Anmeldung. Der Tuner-Port ist nur
+  an 127.0.0.1 gebunden.
+storage:
+  dataRoot: data

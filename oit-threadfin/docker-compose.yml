@@ -1,0 +1,36 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: oit-threadfin_server_1
+      APP_PORT: "34400"
+
+  server:
+    image: fyb3roptik/threadfin:1.2.37@sha256:96122ab220e14b881cbd40d7f8c7b022e1f9c6ecfe05aca2ab801e0321dc0d61
+    user: "31337:31337"
+    init: true
+    restart: on-failure
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # Host loopback only. Umbrel's gateway reaches this container by its
+    # Docker IP, not by this published port. Plex, running with host
+    # networking, uses http://127.0.0.1:34400 and therefore does not need
+    # the port on 0.0.0.0. Inside the container Threadfin still listens
+    # on 0.0.0.0 so the gateway and the published port reach the same process.
+    ports:
+      - "127.0.0.1:34400:34400"
+    environment:
+      THREADFIN_PORT: "34400"
+      THREADFIN_BIND_IP_ADDRESS: 0.0.0.0
+      THREADFIN_DEBUG: "0"
+    volumes:
+      - ${APP_DATA_DIR}/data/conf:/home/threadfin/conf
+      - ${APP_DATA_DIR}/data/cache:/home/threadfin/cache
+    tmpfs:
+      - /tmp
+      - /var/log
+      - /run
