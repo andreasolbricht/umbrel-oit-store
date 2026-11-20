@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="OIT Open Terminal">
+  <rect width="64" height="64" rx="14" fill="#142033"/>
+  <rect x="10" y="14" width="44" height="36" rx="6" fill="#0c141f" stroke="#7fd1c8" stroke-width="2"/>
+  <path d="M18 28l8 6-8 6" fill="none" stroke="#f4f7fb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M32 40h14" stroke="#7fd1c8" stroke-width="3" stroke-linecap="round"/>
+</svg>
