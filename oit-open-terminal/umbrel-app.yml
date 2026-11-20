@@ -1,0 +1,77 @@
+manifestVersion: 1
+id: oit-open-terminal
+category: ai
+name: OIT Open Terminal
+version: "0.1.0"
+tagline: Terminal-Backend für Open WebUI
+description: >-
+  OIT Open Terminal gibt der Open-WebUI-App auf demselben Umbrel ein
+  Terminal-Backend. Open WebUI ruft die API nur im internen Docker-Netz auf,
+  unter http://oit-open-terminal_terminal_1:8000. Der Umbrel-Port zeigt eine
+  Statusseite und leitet nicht an die Terminal-API weiter. Der API-Schlüssel
+  ist das von Umbrel angezeigte App-Passwort (OPEN_TERMINAL_API_KEY aus
+  APP_PASSWORD). Browser und Desktop des Images sind aus. Home und Logs
+  liegen unter app-data/oit-open-terminal/data.
+
+  Sicherheit: Der Dienst bindet /var/run/docker.sock und das gesamte
+  Umbrel-App-Datenverzeichnis ein. Der Docker-Socket ist die Steuerung des
+  Docker-Daemons. Das ist weitreichend, weil der Daemon weitere Container
+  starten kann. Dieses Paket enthält keinen Host-Shell-Helfer, kein
+  privileged, kein pid:host und kein Mount von /. Tokens für andere Apps
+  werden später in den Umbrel-App-Einstellungen gesetzt, nicht in diesem
+  Store.
+
+  OIT Open Terminal is a terminal backend for the Open WebUI app on this
+  Umbrel. Open WebUI calls http://oit-open-terminal_terminal_1:8000 on the
+  internal Docker network only. The Umbrel port is a status page and does
+  not publish the terminal API. The API key is the password Umbrel shows for
+  this app. Browser and desktop features are disabled. Mounting docker.sock
+  and all app data grants control of the Docker daemon. This package does
+  not add a host shell, privileged mode, a host PID namespace, or a mount
+  of /.
+developer: Open WebUI
+website: https://github.com/open-webui/open-terminal
+dependencies: []
+repo: https://github.com/open-webui/open-terminal
+support: https://github.com/open-webui/open-terminal/issues
+port: 34521
+gallery: []
+path: /
+defaultUsername: ""
+defaultPassword: ""
+deterministicPassword: true
+icon: https://raw.githubusercontent.com/andreasolbricht/umbrel-oit-store/main/oit-open-terminal/icon.svg
+submitter: OIT
+releaseNotes: >-
+  Erstes Paket. Open Terminal 0.17.20 (Release v0.17.20, 2026-11-16), Image
+  ghcr.io/open-webui/open-terminal:0.17.20@sha256:0b5efee30aad238aa4f9268e29f674c5b1ca47022a1d84c5ec8083047bf826ed
+  (OCI-Index, linux/amd64 und linux/arm64). Statusseite busybox 1.37.0,
+  sha256:a7dbc319b1438115a207e11930dc4bb3e643dcb3ec0bdd694bb36cd8fad289ec.
+  Terminal-API nur intern auf Port 8000. Umbrel-Port 34521 ist die Statusseite.
+environment:
+  - name: HA_TOKEN
+    services: [terminal]
+    note: Home Assistant long-lived token. Leer lassen, bis er in den App-Einstellungen steht. Leave empty until set.
+  - name: PAPERLESS_TOKEN
+    services: [terminal]
+    note: Paperless API token. Leer lassen, bis er in den App-Einstellungen steht. Leave empty until set.
+  - name: BOOKSTACK_TOKEN_ID
+    services: [terminal]
+    note: BookStack API token id. Leer lassen, bis er in den App-Einstellungen steht. Leave empty until set.
+  - name: BOOKSTACK_TOKEN_SECRET
+    services: [terminal]
+    note: BookStack API token secret. Leer lassen, bis er in den App-Einstellungen steht. Leave empty until set.
+  - name: WGER_TOKEN
+    services: [terminal]
+    note: wger API token. Leer lassen, bis er in den App-Einstellungen steht. Leave empty until set.
+  - name: GHOSTFOLIO_TOKEN
+    services: [terminal]
+    note: Ghostfolio API token. Leer lassen, bis er in den App-Einstellungen steht. Leave empty until set.
+  - name: FIREFLY_PAT
+    services: [terminal]
+    note: Firefly III personal access token. Leer lassen, bis er in den App-Einstellungen steht. Leave empty until set.
+  - name: GRAFANA_TOKEN
+    services: [terminal]
+    note: Grafana API token. Leer lassen, bis er in den App-Einstellungen steht. Leave empty until set.
+storage:
+  dataRoot: data

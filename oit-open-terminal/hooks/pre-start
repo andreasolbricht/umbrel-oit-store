@@ -1,0 +1,62 @@
+#!/bin/sh
+set -eu
+
+if [ -z "${UMBREL_ROOT:-}" ]; then
+  echo "UMBREL_ROOT is not set" >&2
+  exit 1
+fi
+
+app_dir="${UMBREL_ROOT}/app-data/oit-open-terminal"
+data="${app_dir}/data"
+
+if [ -L "${app_dir}" ] || [ -L "${data}" ]; then
+  echo "oit-open-terminal data path must not be a symlink" >&2
+  exit 1
+fi
+
+mkdir -p "${data}"
+
+if [ -L "${data}/home" ] || [ -L "${data}/logs" ]; then
+  echo "oit-open-terminal home or logs must not be a symlink" >&2
+  exit 1
+fi
+
+mkdir -p "${data}/home" "${data}/logs"
+
+services="${data}/home/SERVICES.md"
+if [ -L "${services}" ]; then
+  echo "oit-open-terminal SERVICES.md must not be a symlink" >&2
+  exit 1
+fi
+
+if [ ! -e "${services}" ]; then
+  cat > "${services}" <<'EOF'
+# Internal services
+
+These names resolve on Umbrel's `umbrel_main_network`, except Home Assistant.
+Home Assistant listens on the host network, so the terminal reaches it through
+`host.docker.internal`. A name below works only while that app is installed
+with Umbrel's container name.
+
+Tokens are not stored in this file. Umbrel injects them into the terminal
+container when they are set in this app's settings. Until then the variables
+are empty.
+
+| Service | URL | Token variable |
+| --- | --- | --- |
+| Home Assistant | http://host.docker.internal:8123 | HA_TOKEN |
+| Paperless | http://paperless_webserver_1:8000 | PAPERLESS_TOKEN |
+| BookStack | http://bookstack_server_1:80 | BOOKSTACK_TOKEN_ID and BOOKSTACK_TOKEN_SECRET |
+| wger | http://wger_web_1:8000 | WGER_TOKEN |
+| Ghostfolio | http://ghostfolio_server_1:3333 | GHOSTFOLIO_TOKEN |
+| Firefly III | http://firefly-iii_server_1:8080 | FIREFLY_PAT |
+| Grafana | http://grafana_web_1:3000 | GRAFANA_TOKEN |
+| Ollama | http://ollama_ollama_1:11434 | none |
+
+Open WebUI calls this terminal at http://oit-open-terminal_terminal_1:8000.
+The API key is the Umbrel app password, passed as OPEN_TERMINAL_API_KEY.
+EOF
+fi
+
+chown -R 1000:1000 "${data}"
+chmod 750 "${data}" "${data}/home" "${data}/logs"

@@ -1,6 +1,6 @@
 # OIT Umbrel App Store
 
-Community-App-Store für Umbrel mit einer App: Threadfin als IPTV-Proxy für Plex. Der Store enthält keine Playlist-URLs und keine Zugangsdaten.
+Community-App-Store für Umbrel. Enthalten sind Threadfin als IPTV-Proxy für Plex und OIT Open Terminal als Terminal-Backend für Open WebUI. Der Store enthält keine Playlist-URLs, keine API-Tokens und keine Zugangsdaten.
 
 ## Store hinzufügen
 
@@ -38,11 +38,37 @@ Umbrel leitet die Oberfläche über das App-Gateway an die Container-IP weiter. 
 
 Der Container läuft als User `31337:31337`, ohne Docker-Socket, ohne `privileged` und ohne Host-Netz. Konfiguration liegt unter `app-data/oit-threadfin/data/conf`.
 
+## Open Terminal
+
+`oit-open-terminal` hängt den Docker-Socket und `app-data` in das offizielle Open-Terminal-Image. Der Socket steuert den Docker-Daemon. Das Paket startet keinen Host-Shell-Helfer, setzt kein `privileged`, kein `pid: host` und hängt `/` nicht ein. Die Terminal-API lauscht nur im Compose-Netz auf Port 8000. Der Umbrel-Port `34521` zeigt eine Statusseite.
+
+Der API-Schlüssel ist das App-Passwort, das Umbrel aus `deterministicPassword` anzeigt. Open WebUI trägt als System-Terminal `http://oit-open-terminal_terminal_1:8000` ein. Tokens für Home Assistant, Paperless, BookStack, wger, Ghostfolio, Firefly III und Grafana kommen über die App-Einstellungen, nicht aus diesem Repository.
+
+Vor der Installation prüfen, dass `app-data/oit-open-terminal` noch nicht existiert. Eine Deinstallation löscht das gesamte App-Datenverzeichnis.
+
 ## Lokal prüfen
+
+Threadfin, mit älterem Compose:
 
 ```sh
 export APP_DATA_DIR=/tmp/oit-threadfin
 docker compose --project-directory oit-threadfin config
+```
+
+`app_proxy` hat kein Image. umbrelOS 2.0 setzt dafür nur beim Rendern `image: app-proxy-config-only` und startet den Dienst nicht. Compose 2.40 lehnt die Datei allein deshalb ab, auch bei Threadfin. Die laufenden Dienste von Open Terminal prüft man an der Datei ohne `app_proxy`:
+
+```sh
+export APP_DATA_DIR=/tmp/oit-open-terminal
+export APP_PASSWORD=dummy
+export UMBREL_ROOT=/tmp/umbrel
+export DOCKER_SOCK_GID=999
+python3 - <<'PY'
+import yaml
+cfg = yaml.safe_load(open("oit-open-terminal/docker-compose.yml"))
+cfg["services"].pop("app_proxy", None)
+yaml.safe_dump(cfg, open("/tmp/oit-open-terminal-runtime.yml", "w"), sort_keys=False)
+PY
+docker compose --project-directory oit-open-terminal -f /tmp/oit-open-terminal-runtime.yml config
 ```
 
 Die Design-Spec steht unter `docs/superpowers/specs/2026-11-09-threadfin-umbrel-design.md`.

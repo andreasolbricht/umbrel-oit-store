@@ -1,0 +1,82 @@
+version: "3.7"
+
+services:
+  # Umbrel reads this service as the LAN gateway target and does not publish
+  # it as a container on umbrelOS 2.0. It must not point at the terminal API.
+  app_proxy:
+    environment:
+      APP_HOST: oit-open-terminal_status_1
+      APP_PORT: "34521"
+
+  terminal:
+    image: ghcr.io/open-webui/open-terminal:0.17.20@sha256:0b5efee30aad238aa4f9268e29f674c5b1ca47022a1d84c5ec8083047bf826ed
+    container_name: oit-open-terminal_terminal_1
+    restart: on-failure
+    mem_limit: 2g
+    # The image USER is the account `user` (useradd, UID 1000) with
+    # passwordless sudo. Do not set user, read_only, or no-new-privileges:
+    # the entrypoint uses sudo to record the socket group, and the server
+    # binary relies on file capabilities. group_add below is what actually
+    # puts that group on the process. usermod in the entrypoint does not
+    # change the groups of the already started process.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    group_add:
+      - "${DOCKER_SOCK_GID:?DOCKER_SOCK_GID is required}"
+    environment:
+      OPEN_TERMINAL_API_KEY: ${APP_PASSWORD:?APP_PASSWORD is required}
+      OPEN_TERMINAL_ENABLE_BROWSER: "false"
+      OPEN_TERMINAL_ENABLE_DESKTOP: "false"
+      OPEN_TERMINAL_LOG_DIR: /var/log/open-terminal
+      HA_TOKEN: ${HA_TOKEN:-}
+      PAPERLESS_TOKEN: ${PAPERLESS_TOKEN:-}
+      BOOKSTACK_TOKEN_ID: ${BOOKSTACK_TOKEN_ID:-}
+      BOOKSTACK_TOKEN_SECRET: ${BOOKSTACK_TOKEN_SECRET:-}
+      WGER_TOKEN: ${WGER_TOKEN:-}
+      GHOSTFOLIO_TOKEN: ${GHOSTFOLIO_TOKEN:-}
+      FIREFLY_PAT: ${FIREFLY_PAT:-}
+      GRAFANA_TOKEN: ${GRAFANA_TOKEN:-}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${UMBREL_ROOT}/app-data:/umbrel/app-data
+      - ${APP_DATA_DIR}/data/home:/home/user
+      - ${APP_DATA_DIR}/data/logs:/var/log/open-terminal
+
+  status:
+    image: busybox:1.37.0@sha256:a7dbc319b1438115a207e11930dc4bb3e643dcb3ec0bdd694bb36cd8fad289ec
+    container_name: oit-open-terminal_status_1
+    restart: on-failure
+    mem_limit: 64m
+    read_only: true
+    user: "65534:65534"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /www:mode=1777,size=1m
+    command:
+      - sh
+      - -c
+      - |
+        cat > /www/index.html <<'EOF'
+        <!DOCTYPE html>
+        <html lang="de">
+        <head>
+          <meta charset="utf-8">
+          <title>OIT Open Terminal</title>
+          <style>
+            body { font-family: sans-serif; margin: 2rem; line-height: 1.45; max-width: 40rem; }
+            code { font-size: 1rem; }
+          </style>
+        </head>
+        <body>
+          <h1>OIT Open Terminal</h1>
+          <p>Dieses Terminal ist nur für Open WebUI. Die Terminal-API ist über diesen Umbrel-Port nicht erreichbar.</p>
+          <p>This terminal is for Open WebUI only. The terminal API is not reachable through this Umbrel port.</p>
+          <p>Interne URL / internal URL:</p>
+          <p><code>http://oit-open-terminal_terminal_1:8000</code></p>
+        </body>
+        </html>
+        EOF
+        exec httpd -f -p 34521 -h /www
